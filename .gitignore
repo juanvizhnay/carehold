@@ -1,0 +1,27 @@
+.DS_Store
+/.build
+/Packages/*/.build
+/Packages/*/.swiftpm
+/Packages/*/Package.resolved
+xcuserdata/
+DerivedData/
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc
+
+/xtool
+
+# Secrets and generated config
+.env
+.env.*
+!.env.example
+AppConfig.swift
+
+# Local tooling
+.bsp/
+.wrangler/
+
+# Demo accounts (passwords come from .env)
+supabase/seed.sql
+supabase/.temp
+supabase/.branches

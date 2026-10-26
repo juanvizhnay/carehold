@@ -1,0 +1,7 @@
+version: 1
+bundleID: com.juanvizh.carehold
+infoPath: Info.plist
+# Home-screen icon, made from assets/logo/logo_corto.png. xtool sets CFBundleIconFile.
+iconPath: assets/app-icon/AppIcon.png
+resources:
+  - App/PrivacyInfo.xcprivacy
