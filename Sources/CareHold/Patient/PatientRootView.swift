@@ -4,7 +4,7 @@ import SwiftUI
 
 /// Three tabs, each answering one question:
 /// Today "what do I do now?", Visits "when do I go, and what did they tell me?",
-/// Messages "how do I reach my therapist?".
+/// Messages "how do I reach my care team?".
 struct PatientRootView: View {
     @State private var model: PatientModel
     @State private var tab: Tab = .today
@@ -72,7 +72,7 @@ struct PatientRootView: View {
     }
 }
 
-/// Shown once: the patient types the six-letter code their therapist gave them.
+/// Shown once: the patient types the six-letter code their care provider gave them.
 struct JoinClinicianView: View {
     let model: PatientModel
     let signOut: () async -> Void
@@ -91,7 +91,7 @@ struct JoinClinicianView: View {
                     Text("Hello, \(model.me.firstName)")
                         .font(DS.Typography.title)
                         .foregroundStyle(DS.Colors.textPrimary)
-                    Text("Type the 6-letter code your therapist or doctor gave you. You only need to do this once.")
+                    Text("Type the 6-letter code your doctor or care provider gave you. You only need to do this once.")
                         .font(DS.Typography.body)
                         .foregroundStyle(DS.Colors.textSecondary)
                 }

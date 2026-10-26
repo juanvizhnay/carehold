@@ -4,7 +4,7 @@ import SwiftUI
 
 /// "Ask a question": answers come only from the patient's own plan. Rules answer the common
 /// questions on every iPhone; Apple Intelligence answers the rest on the device. Anything
-/// neither can answer goes to the therapist in one tap, and emergencies always mean 911.
+/// neither can answer goes to the care team in one tap, and emergencies always mean 911.
 struct AskSheet: View {
     let model: PatientModel
     let openMessages: () -> Void

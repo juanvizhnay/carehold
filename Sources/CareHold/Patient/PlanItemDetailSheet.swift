@@ -55,7 +55,7 @@ struct PlanItemDetailSheet: View {
                                 .fixedSize(horizontal: false, vertical: true)
                                 .textSelection(.enabled)
                             if simpler != nil {
-                                Text("Simpler words by Apple Intelligence on this iPhone. Your therapist's note is the one that counts.")
+                                Text("Simpler words by Apple Intelligence on this iPhone. The original note from your care team is the one that counts.")
                                     .font(DS.Typography.caption)
                                     .foregroundStyle(DS.Colors.textSecondary)
                             }

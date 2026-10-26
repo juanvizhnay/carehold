@@ -26,9 +26,9 @@ enum CareAI {
         #if canImport(FoundationModels)
         if #available(iOS 26, *), isAvailable {
             let session = LanguageModelSession(instructions: """
-                You help an older adult understand their own care plan from their physical therapist \
-                or doctor, \(clinicianName). Use ONLY the facts below. Answer in two or three short, \
-                warm, plain sentences, like talking to a grandparent. No lists, no markdown.
+                You help a patient understand their own care plan from their doctor or care provider, \
+                \(clinicianName). Use ONLY the facts below. Answer in two or three short, warm, plain \
+                sentences that anyone can follow, with no medical jargon. No lists, no markdown.
                 Rules:
                 - Never diagnose, never suggest new medicines, never change a dose, time or exercise.
                 - If the facts do not answer the question, say you are not sure and suggest asking \
@@ -54,7 +54,7 @@ enum CareAI {
         #if canImport(FoundationModels)
         if #available(iOS 26, *), isAvailable {
             let session = LanguageModelSession(instructions: """
-                Rewrite health instructions for an older adult in very plain words. Keep every fact, \
+                Rewrite health instructions in very plain words that anyone can follow. Keep every fact, \
                 number, time and warning exactly. Do not add advice. Use short sentences, at most five. \
                 No markdown.
                 """)
@@ -104,7 +104,7 @@ enum CareAI {
     @available(iOS 26, *)
     private static func modelDraft(from sentence: String) async -> PlanItemDraft? {
         let session = LanguageModelSession(instructions: """
-            Extract one care plan item a physical therapist or doctor dictated. Never invent doses or times \
+            Extract one care plan item a doctor, nurse or therapist dictated. Never invent doses or times \
             that are not in the sentence; "twice a day" means 08:00 and 20:00, "three times a day" means \
             08:00, 14:00 and 20:00, "at bedtime" means 21:00.
             """)

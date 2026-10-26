@@ -29,7 +29,7 @@ struct AppointmentEditor: View {
             after: Date(), matching: DateComponents(minute: 0), matchingPolicy: .nextTime
         ) ?? Date()
         let isRequest = existing?.status == .requested
-        _title = State(initialValue: isRequest ? "Therapy session" : existing?.title ?? "Therapy session")
+        _title = State(initialValue: isRequest ? "Appointment" : existing?.title ?? "Appointment")
         _startsAt = State(initialValue: existing?.startsAt ?? defaultStart)
         _duration = State(initialValue: existing?.durationMinutes ?? 45)
         _location = State(initialValue: existing?.location ?? model.me.clinicName ?? "")

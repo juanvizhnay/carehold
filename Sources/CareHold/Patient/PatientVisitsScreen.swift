@@ -145,7 +145,7 @@ private struct PastVisitRow: View {
     }
 }
 
-/// What the therapist said and prescribed at a past visit.
+/// What the care team said and prescribed at a past visit.
 struct PastVisitScreen: View {
     let visit: Appointment
     let model: PatientModel
@@ -177,7 +177,7 @@ struct PastVisitScreen: View {
                             .fixedSize(horizontal: false, vertical: true)
                             .textSelection(.enabled)
                         if simpler != nil {
-                            Text("Simpler words by Apple Intelligence on this iPhone. Your therapist's note is the one that counts.")
+                            Text("Simpler words by Apple Intelligence on this iPhone. The original note from your care team is the one that counts.")
                                 .font(DS.Typography.caption)
                                 .foregroundStyle(DS.Colors.textSecondary)
                         }
@@ -256,7 +256,7 @@ struct RequestVisitSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.Spacing.l) {
-                    Text("\(model.clinician?.displayName ?? "Your therapist") will confirm the time with you.")
+                    Text("\(model.clinician?.displayName ?? "Your care team") will confirm the time with you.")
                         .font(DS.Typography.body)
                         .foregroundStyle(DS.Colors.textSecondary)
                     VStack(alignment: .leading, spacing: DS.Spacing.s) {
@@ -268,7 +268,7 @@ struct RequestVisitSheet: View {
                     }
                     VStack(alignment: .leading, spacing: DS.Spacing.s) {
                         SectionLabel("Anything they should know? (optional)")
-                        TextField("For example: my knee hurts more", text: $note, axis: .vertical)
+                        TextField("For example: the pain has gotten worse", text: $note, axis: .vertical)
                             .textFieldStyle(.ds)
                             .lineLimit(2...5)
                     }

@@ -53,7 +53,7 @@ public enum CareAssistant {
         }
         if let item { return .item(item) }
 
-        if ["appointment", "visit", "session", "therapy", "see the doctor", "see my", "come in", "next time"].contains(where: lower.contains) {
+        if ["appointment", "visit", "session", "therapy", "checkup", "check-up", "consultation", "see the doctor", "see my", "come in", "next time"].contains(where: lower.contains) {
             return .nextAppointment(context.nextAppointment)
         }
 

@@ -184,7 +184,7 @@ create table public.appointments (
     check (status in ('requested', 'scheduled', 'completed', 'cancelled')),
   -- What the clinician wrote after the visit, shown to the patient under past visits.
   visit_summary text check (char_length(visit_summary) <= 4000),
-  -- What the patient wrote when requesting it ("my knee hurts more").
+  -- What the patient wrote when requesting it ("the pain has gotten worse").
   patient_note text check (char_length(patient_note) <= 1000),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

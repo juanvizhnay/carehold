@@ -5,7 +5,7 @@ import SwiftUI
 ///
 /// CareHold is warm and quiet: vanilla paper, white cards, soft pastel tints that tell
 /// medicines, exercises, instructions and visits apart, and dark warm text with strong contrast
-/// for older eyes. Color is never the only signal: every tint comes with an icon and a word.
+/// for every pair of eyes, including older ones. Color is never the only signal: every tint comes with an icon and a word.
 public enum DS {
     public enum Colors {
         public static let background = hex(0xFAF6EE)        // vanilla
@@ -83,7 +83,7 @@ public enum DS {
     }
 
     public enum Size {
-        /// Larger than Apple's 44 pt minimum: older hands and tremors.
+        /// Larger than Apple's 44 pt minimum: easier for everyone, essential with tremors or low vision.
         public static let tapTarget: CGFloat = 56
         public static let buttonHeight: CGFloat = 60
         public static let icon: CGFloat = 48
