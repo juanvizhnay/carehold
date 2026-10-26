@@ -20,6 +20,19 @@ VANILLA = (250, 246, 238)
 SAGE = (70, 112, 95)
 
 
+def knocked_out(image: Image.Image) -> Image.Image:
+    """Dark ink on an opaque light background -> the same ink on transparency."""
+    gray = image.convert("L")
+    background = max(gray.getextrema()[1], 1)
+    ink = (35, 31, 30)
+    # Paper noise within ~30 levels of the background becomes fully transparent.
+    paper = background - 30
+    alpha = gray.point(lambda value: max(0, min(255, round((paper - value) * 255 / max(paper - 40, 1)))))
+    result = Image.new("RGBA", image.size, ink + (0,))
+    result.putalpha(alpha)
+    return result
+
+
 def trimmed(image: Image.Image) -> Image.Image:
     image = image.convert("RGBA")
     box = image.getchannel("A").getbbox()
@@ -57,7 +70,10 @@ def export_wordmark() -> None:
         WORDMARK.unlink(missing_ok=True)
         print("no wordmark (add assets/logo.png); the app shows the name in serif")
         return
-    logo = trimmed(Image.open(source))
+    logo = Image.open(source).convert("RGBA")
+    if logo.getchannel("A").getextrema()[0] == 255:
+        logo = knocked_out(logo)
+    logo = trimmed(logo)
     scale = 240 / logo.height
     logo = logo.resize((round(logo.width * scale), 240), Image.LANCZOS)
     WORDMARK.parent.mkdir(parents=True, exist_ok=True)
