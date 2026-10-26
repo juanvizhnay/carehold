@@ -25,3 +25,6 @@ AppConfig.swift
 supabase/seed.sql
 supabase/.temp
 supabase/.branches
+
+# Private project notes for Claude, never published
+CLAUDE.md
