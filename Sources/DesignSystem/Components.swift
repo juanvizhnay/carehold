@@ -62,6 +62,25 @@ public struct PrimaryButtonStyle: ButtonStyle {
     }
 }
 
+/// Leaving actions such as "Sign out": red words on a soft red panel.
+public struct DestructiveButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    public func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(DS.Typography.button)
+            .foregroundStyle(DS.Colors.critical)
+            .frame(maxWidth: .infinity, minHeight: DS.Size.buttonHeight)
+            .padding(.horizontal, DS.Spacing.m)
+            .background(
+                DS.Colors.criticalSoft.opacity(configuration.isPressed ? 0.7 : 1),
+                in: RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
+            )
+            .opacity(isEnabled ? 1 : 0.45)
+            .contentShape(Rectangle())
+    }
+}
+
 public struct SecondaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
@@ -85,29 +104,35 @@ public extension ButtonStyle where Self == PrimaryButtonStyle {
     static func dsPrimary(isLoading: Bool) -> PrimaryButtonStyle { PrimaryButtonStyle(isLoading: isLoading) }
 }
 
+public extension ButtonStyle where Self == DestructiveButtonStyle {
+    static var dsDestructive: DestructiveButtonStyle { DestructiveButtonStyle() }
+}
+
 public extension ButtonStyle where Self == SecondaryButtonStyle {
     static var dsSecondary: SecondaryButtonStyle { SecondaryButtonStyle() }
 }
 
 // MARK: - Text field
 
+/// No box: the words sit on the page. The prompt (see `dsPrompt`) says what to write there.
 public struct DSTextFieldStyle: TextFieldStyle {
     public func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
             .font(DS.Typography.body)
             .foregroundStyle(DS.Colors.textPrimary)
-            .padding(.horizontal, DS.Spacing.m)
-            .frame(minHeight: DS.Size.buttonHeight)
-            .background(DS.Colors.surface, in: RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous)
-                    .strokeBorder(DS.Colors.hairline, lineWidth: DS.Size.hairline)
-            )
+            .tint(DS.Colors.accent)
+            .frame(maxWidth: .infinity, minHeight: DS.Size.tapTarget, alignment: .leading)
+            .contentShape(Rectangle())
     }
 }
 
 public extension TextFieldStyle where Self == DSTextFieldStyle {
     static var ds: DSTextFieldStyle { DSTextFieldStyle() }
+}
+
+/// Placeholder text in the secondary color, so it stays readable (AA) without a box around it.
+public func dsPrompt(_ text: String) -> Text {
+    Text(text).foregroundStyle(DS.Colors.textSecondary)
 }
 
 // MARK: - Pieces

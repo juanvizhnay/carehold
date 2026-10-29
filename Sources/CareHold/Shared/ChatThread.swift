@@ -48,7 +48,7 @@ struct ChatThread: View {
 
     private var composer: some View {
         HStack(alignment: .bottom, spacing: DS.Spacing.s) {
-            TextField(placeholder, text: $draft, axis: .vertical)
+            TextField("Message", text: $draft, prompt: dsPrompt(placeholder), axis: .vertical)
                 .textFieldStyle(.ds)
                 .lineLimit(1...5)
                 .focused($focused)
@@ -89,26 +89,26 @@ private struct Bubble: View {
         HStack {
             if isMine { Spacer(minLength: DS.Spacing.xxl) }
             VStack(alignment: .leading, spacing: DS.Spacing.xxs) {
-                if message.kind == .reminder {
+                if isReminder {
                     Label("Reminder", systemImage: DS.Symbols.reminder)
-                        .font(DS.Typography.caption.weight(.semibold))
+                        .font(DS.Typography.label)
                         .foregroundStyle(DS.Tints.reminder.ink)
                 }
                 Text(message.body)
                     .font(DS.Typography.body)
-                    .foregroundStyle(isMine ? DS.Colors.onAccent : DS.Colors.textPrimary)
+                    .foregroundStyle(isOnAccent ? DS.Colors.onAccent : DS.Colors.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
                     .textSelection(.enabled)
                 Text(Format.time(message.createdAt))
                     .font(DS.Typography.caption)
-                    .foregroundStyle(isMine ? DS.Colors.onAccent.opacity(0.85) : DS.Colors.textSecondary)
+                    .foregroundStyle(isOnAccent ? DS.Colors.onAccent.opacity(0.85) : DS.Colors.textSecondary)
             }
             .padding(.horizontal, DS.Spacing.m)
             .padding(.vertical, DS.Spacing.s)
             .background(fill, in: RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
-                    .strokeBorder(isMine || message.kind == .reminder ? .clear : DS.Colors.hairline, lineWidth: DS.Size.hairline)
+                    .strokeBorder(isMine || isReminder ? .clear : DS.Colors.hairline, lineWidth: DS.Size.hairline)
             )
             if !isMine { Spacer(minLength: DS.Spacing.xxl) }
         }
@@ -116,8 +116,13 @@ private struct Bubble: View {
         .accessibilityLabel("\(isMine ? "You" : otherName)\(message.kind == .reminder ? ", reminder" : ""): \(message.body), \(Format.time(message.createdAt))")
     }
 
+    private var isReminder: Bool { message.kind == .reminder }
+
+    /// Reminders are butter on both sides, so they read as reminders and their label stays legible.
+    private var isOnAccent: Bool { isMine && !isReminder }
+
     private var fill: Color {
-        if isMine { return DS.Colors.accent }
-        return message.kind == .reminder ? DS.Tints.reminder.fill : DS.Colors.surface
+        if isReminder { return DS.Tints.reminder.fill }
+        return isMine ? DS.Colors.accent : DS.Colors.surface
     }
 }

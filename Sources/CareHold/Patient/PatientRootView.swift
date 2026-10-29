@@ -95,7 +95,7 @@ struct JoinClinicianView: View {
                         .font(DS.Typography.body)
                         .foregroundStyle(DS.Colors.textSecondary)
                 }
-                TextField("ABC234", text: $code)
+                TextField("Care code", text: $code, prompt: dsPrompt("ABC234"))
                     .textFieldStyle(.ds)
                     .font(.system(.largeTitle, design: .monospaced).weight(.semibold))
                     .multilineTextAlignment(.center)
@@ -115,7 +115,7 @@ struct JoinClinicianView: View {
                     .buttonStyle(.dsPrimary(isLoading: isLoading))
                     .disabled(code.count != 6 || isLoading)
                 Button("Sign out") { Task { await signOut() } }
-                    .buttonStyle(.dsSecondary)
+                    .buttonStyle(.dsDestructive)
             }
             .padding(DS.Spacing.l)
         }

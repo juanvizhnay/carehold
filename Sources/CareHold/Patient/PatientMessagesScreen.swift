@@ -10,7 +10,7 @@ struct PatientMessagesScreen: View {
             messages: model.messages,
             myID: model.me.id,
             otherName: model.clinician?.displayName ?? "your care team",
-            placeholder: "Write a message",
+            placeholder: "Write to \(model.clinician?.displayName ?? "your care team")",
             send: { await model.send($0) }
         )
         .navigationTitle(model.clinician?.displayName ?? "Messages")
@@ -59,15 +59,8 @@ struct PatientSettingsSheet: View {
                             }
                         }
                     }
-                    VStack(alignment: .leading, spacing: DS.Spacing.s) {
-                        SectionLabel("Bigger text")
-                        Text("To make all the text bigger, open the Settings app, then Display & Brightness, then Text Size.")
-                            .font(DS.Typography.secondary)
-                            .foregroundStyle(DS.Colors.textSecondary)
-                            .dsCard()
-                    }
                     Button("Sign out") { isConfirmingSignOut = true }
-                        .buttonStyle(.dsSecondary)
+                        .buttonStyle(.dsDestructive)
                         .confirmationDialog("Sign out of CareHold?", isPresented: $isConfirmingSignOut, titleVisibility: .visible) {
                             Button("Sign out", role: .destructive) { Task { await signOut() } }
                             Button("Cancel", role: .cancel) {}

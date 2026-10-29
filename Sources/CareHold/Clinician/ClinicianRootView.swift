@@ -1,6 +1,7 @@
 import Core
 import DesignSystem
 import SwiftUI
+import UIKit
 
 /// Two tabs: Schedule "who do I see, and who is asking?" and Patients "how is each one doing?".
 struct ClinicianRootView: View {
@@ -212,7 +213,7 @@ struct ClinicianAccountSheet: View {
                     }
                     PatientCodeCard(code: model.me.clinicianCode)
                     Button("Sign out") { isConfirmingSignOut = true }
-                        .buttonStyle(.dsSecondary)
+                        .buttonStyle(.dsDestructive)
                         .confirmationDialog("Sign out of CareHold?", isPresented: $isConfirmingSignOut, titleVisibility: .visible) {
                             Button("Sign out", role: .destructive) { Task { await signOut() } }
                             Button("Cancel", role: .cancel) {}
@@ -235,6 +236,7 @@ struct ClinicianAccountSheet: View {
 /// The code patients type once to connect. Big and spaced so it can be read aloud.
 struct PatientCodeCard: View {
     let code: String?
+    @State private var isCopied = false
 
     var body: some View {
         if let code {
@@ -250,10 +252,19 @@ struct PatientCodeCard: View {
                 Text("New patients type it once in CareHold to connect with you.")
                     .font(DS.Typography.secondary)
                     .foregroundStyle(DS.Colors.textSecondary)
-                ShareLink(item: "Download CareHold and connect with me using the code \(code).") {
-                    Label("Share code", systemImage: "square.and.arrow.up")
+                Button {
+                    UIPasteboard.general.string = code
+                    isCopied = true
+                    AccessibilityNotification.Announcement("Code copied").post()
+                } label: {
+                    Label(isCopied ? "Copied" : "Copy code", systemImage: isCopied ? "checkmark" : "doc.on.doc")
                 }
                 .buttonStyle(.dsSecondary)
+                .task(id: isCopied) {
+                    guard isCopied else { return }
+                    try? await Task.sleep(for: .seconds(2))
+                    isCopied = false
+                }
             }
             .dsCard()
         }

@@ -44,7 +44,7 @@ struct AskSheet: View {
                             .font(DS.Typography.secondary)
                             .foregroundStyle(DS.Colors.textSecondary)
                     }
-                    TextField("For example: how do I do the heel slides?", text: $question, axis: .vertical)
+                    TextField("Question", text: $question, prompt: dsPrompt("Type your question here, like “how do I do the heel slides?”"), axis: .vertical)
                         .textFieldStyle(.ds)
                         .lineLimit(1...4)
                         .focused($focused)
