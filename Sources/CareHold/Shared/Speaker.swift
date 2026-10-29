@@ -21,23 +21,33 @@ final class Speaker: NSObject, AVSpeechSynthesizerDelegate {
             return
         }
         synthesizer.stopSpeaking(at: .immediate)
+        // Spoken audio plays even with the silent switch on; other audio ducks while it speaks.
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
+        try? AVAudioSession.sharedInstance().setActive(true)
         let utterance = AVSpeechUtterance(string: text)
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.9
-        utterance.voice = AVSpeechSynthesisVoice(language: Locale.current.identifier)
+        // The app is in English; a voice from the device language would mispronounce it.
+        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         speakingID = id
         synthesizer.speak(utterance)
     }
 
     func stop() {
         synthesizer.stopSpeaking(at: .immediate)
-        speakingID = nil
+        finished()
     }
 
+    private func finished() {
+        speakingID = nil
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    }
+
+    // A cancel also arrives when switching to another text: only finish if nothing new is playing.
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        Task { @MainActor in self.speakingID = nil }
+        Task { @MainActor in if !self.synthesizer.isSpeaking { self.finished() } }
     }
 
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        Task { @MainActor in self.speakingID = nil }
+        Task { @MainActor in if !self.synthesizer.isSpeaking { self.finished() } }
     }
 }
