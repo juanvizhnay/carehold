@@ -16,8 +16,15 @@ struct PatientVisitsScreen: View {
                             .dsCard()
                     } else {
                         ForEach(model.upcomingVisits) { visit in
-                            UpcomingVisitRow(visit: visit, clinician: model.clinicianName(for: visit.clinicianID)) {
+                            let row = UpcomingVisitRow(visit: visit, clinician: model.clinicianName(for: visit.clinicianID)) {
                                 Task { await model.cancelRequest(visit) }
+                            }
+                            // A request has its own Cancel button and nothing more to show.
+                            if visit.status == .requested {
+                                row
+                            } else {
+                                NavigationLink(value: visit) { row }
+                                    .buttonStyle(.plain)
                             }
                         }
                     }
@@ -49,7 +56,7 @@ struct PatientVisitsScreen: View {
         .navigationTitle("Visits")
         .refreshable { await model.load() }
         .navigationDestination(for: Appointment.self) { visit in
-            PastVisitScreen(visit: visit, model: model)
+            VisitScreen(visit: visit, model: model)
         }
         .sheet(isPresented: $isRequesting) {
             RequestVisitSheet(model: model)
@@ -93,6 +100,13 @@ private struct UpcomingVisitRow: View {
                             .font(DS.Typography.secondary)
                             .foregroundStyle(DS.Colors.textSecondary)
                     }
+                }
+                if visit.status != .requested {
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(DS.Colors.textSecondary)
+                        .frame(maxHeight: .infinity)
+                        .accessibilityHidden(true)
                 }
             }
             .accessibilityElement(children: .combine)
@@ -145,8 +159,8 @@ private struct PastVisitRow: View {
     }
 }
 
-/// What the care team said and prescribed at a past visit.
-struct PastVisitScreen: View {
+/// One visit: when and where, and once it happened, what the care team said and prescribed.
+struct VisitScreen: View {
     let visit: Appointment
     let model: PatientModel
     @State private var selected: PlanItem?
@@ -157,7 +171,7 @@ struct PastVisitScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.l) {
                 VStack(alignment: .leading, spacing: DS.Spacing.xxs) {
-                    Text(Format.day(visit.startsAt))
+                    Text(isUpcoming ? Format.dayAndTime(visit.startsAt) : Format.day(visit.startsAt))
                         .font(DS.Typography.body)
                         .foregroundStyle(DS.Colors.textSecondary)
                     Text(visit.title)
@@ -165,6 +179,21 @@ struct PastVisitScreen: View {
                         .foregroundStyle(DS.Colors.textPrimary)
                     Text("With \(model.clinicianName(for: visit.clinicianID))")
                         .font(DS.Typography.body)
+                        .foregroundStyle(DS.Colors.textSecondary)
+                }
+
+                if isUpcoming {
+                    VStack(alignment: .leading, spacing: DS.Spacing.s) {
+                        Label("\(visit.durationMinutes) minutes", systemImage: "clock")
+                        if let location = visit.location {
+                            Label(location, systemImage: "mappin.and.ellipse")
+                        }
+                    }
+                    .font(DS.Typography.body)
+                    .foregroundStyle(DS.Colors.textPrimary)
+                    .dsTinted(DS.Tints.visit)
+                    Text("After the visit, \(model.clinicianName(for: visit.clinicianID))'s notes show up here.")
+                        .font(DS.Typography.secondary)
                         .foregroundStyle(DS.Colors.textSecondary)
                 }
 
@@ -243,6 +272,8 @@ struct PastVisitScreen: View {
         }
         .onDisappear { Speaker.shared.stop() }
     }
+
+    private var isUpcoming: Bool { !visit.isPast(now: model.now) }
 }
 
 struct RequestVisitSheet: View {
@@ -268,7 +299,7 @@ struct RequestVisitSheet: View {
                     }
                     VStack(alignment: .leading, spacing: DS.Spacing.s) {
                         SectionLabel("Anything they should know? (optional)")
-                        TextField("For example: the pain has gotten worse", text: $note, axis: .vertical)
+                        TextField("Note", text: $note, prompt: dsPrompt("Type it here, like “the pain has gotten worse”"), axis: .vertical)
                             .textFieldStyle(.ds)
                             .lineLimit(2...5)
                     }
