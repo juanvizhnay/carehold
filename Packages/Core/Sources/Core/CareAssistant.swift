@@ -45,26 +45,34 @@ public enum CareAssistant {
     public static func answer(_ question: String, context: AssistantContext) -> AssistantAnswer {
         let lower = " " + question.lowercased().folding(options: .diacriticInsensitive, locale: nil) + " "
 
+        // Emergencies match exactly: a "close" word could turn "paint" into "faint".
         if emergencyWords.contains(where: lower.contains) { return .emergency }
 
+        let words = words(in: lower)
+        func mentions(_ keywords: [String]) -> Bool {
+            keywords.contains { keyword in
+                lower.contains(keyword) || (isFuzzyKeyword(keyword) && words.contains { isClose($0, to: keyword) })
+            }
+        }
+
         let item = mentionedItem(in: lower, items: context.activeItems)
-        if ["forgot", "missed", "skipped", "didn't take", "did not take", "double dose", "took two"].contains(where: lower.contains) {
+        if mentions(["forgot", "missed", "skipped", "didn't take", "did not take", "double dose", "took two"]) {
             return .missedDose(item)
         }
         if let item { return .item(item) }
 
-        if ["appointment", "visit", "session", "therapy", "checkup", "check-up", "consultation", "see the doctor", "see my", "come in", "next time"].contains(where: lower.contains) {
+        if mentions(["appointment", "visit", "session", "therapy", "checkup", "check-up", "consultation", "see the doctor", "see my", "come in", "next time"]) {
             return .nextAppointment(context.nextAppointment)
         }
 
         let remaining = context.todayTasks.filter { !$0.isDone }
-        if [" pill", "medicine", "medication", "meds", "tablet", "take "].contains(where: lower.contains) {
+        if mentions([" pill", "medicine", "medication", "meds", "tablet", "take "]) {
             return .today(remaining.filter { $0.item.kind == .medication }, kind: .medication)
         }
-        if ["exercise", "stretch", "workout", "routine"].contains(where: lower.contains) {
+        if mentions(["exercise", "stretch", "workout", "routine"]) {
             return .today(remaining.filter { $0.item.kind == .exercise }, kind: .exercise)
         }
-        if ["today", "what do i", "what should i", "to do", "left", "plan"].contains(where: lower.contains) {
+        if mentions(["today", "what do i", "what should i", "to do", "left", "plan"]) {
             return .today(remaining, kind: nil)
         }
         return .unknown
@@ -76,16 +84,47 @@ public enum CareAssistant {
         "faint", "passed out", "unconscious", "numbness", " numb ", "slurred", "overdose", "took too many",
     ]
 
-    /// An item whose title (or a long word of it) appears in the question.
+    /// An item whose title (or a long word of it, even misspelled) appears in the question.
     static func mentionedItem(in lower: String, items: [PlanItem]) -> PlanItem? {
+        let questionWords = words(in: lower)
         let candidates = items.compactMap { item -> (PlanItem, Int)? in
             let title = item.title.lowercased().folding(options: .diacriticInsensitive, locale: nil)
             if lower.contains(title) { return (item, title.count + 100) }
-            let words = title.split { !$0.isLetter }.map(String.init).filter { $0.count >= 5 && !genericWords.contains($0) }
-            let hits = words.filter { lower.contains($0) }
+            let titleWords = words(in: title).filter { $0.count >= 5 && !genericWords.contains($0) }
+            let hits = titleWords.filter { word in lower.contains(word) || questionWords.contains { isClose($0, to: word) } }
             return hits.isEmpty ? nil : (item, hits.map(\.count).reduce(0, +))
         }
         return candidates.max { $0.1 < $1.1 }?.0
+    }
+
+    private static func words(in text: String) -> [String] {
+        text.split { !$0.isLetter }.map(String.init)
+    }
+
+    /// Single long words are matched with typos too; phrases and short words only exactly.
+    private static func isFuzzyKeyword(_ keyword: String) -> Bool {
+        keyword.count >= 6 && keyword.allSatisfy(\.isLetter)
+    }
+
+    /// A typo away from `target`: one edit for words of 5 to 7 letters, two from 8.
+    /// The first letter must match, which keeps unrelated words apart.
+    static func isClose(_ word: String, to target: String) -> Bool {
+        guard target.count >= 5, word.first == target.first else { return false }
+        let allowed = target.count >= 8 ? 2 : 1
+        guard abs(word.count - target.count) <= allowed else { return false }
+        return editDistance(Array(word), Array(target)) <= allowed
+    }
+
+    private static func editDistance(_ a: [Character], _ b: [Character]) -> Int {
+        var previous = Array(0...b.count)
+        for (i, x) in a.enumerated() {
+            var current = [i + 1]
+            for (j, y) in b.enumerated() {
+                current.append(min(previous[j + 1] + 1, current[j] + 1, previous[j] + (x == y ? 0 : 1)))
+            }
+            previous = current
+        }
+        return previous[b.count]
     }
 
     /// Words too common in titles to identify one item ("exercise", "daily").

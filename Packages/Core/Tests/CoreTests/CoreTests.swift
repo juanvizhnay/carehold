@@ -133,6 +133,21 @@ private func item(_ title: String, kind: PlanItem.Kind = .medication, times: [St
         #expect(tasks.count == 2)
     }
 
+    @Test func toleratesTypos() {
+        #expect(CareAssistant.answer("how do i take the ibuprofin", context: context) == .item(pills))
+        #expect(CareAssistant.answer("when do I take ibuprophen?", context: context) == .item(pills))
+        #expect(CareAssistant.answer("i forgt my ibuprofn", context: context) == .missedDose(pills))
+        #expect(CareAssistant.answer("how many heel slide do i do", context: context) == .item(slides))
+        guard case .nextAppointment = CareAssistant.answer("when is my next apointment", context: context) else {
+            Issue.record("expected appointment")
+            return
+        }
+        guard case .today(_, kind: .medication) = CareAssistant.answer("what medicin do I have left", context: context) else {
+            Issue.record("expected medicines")
+            return
+        }
+    }
+
     @Test func unknownGoesToClinician() {
         #expect(CareAssistant.answer("Is it ok to swim?", context: context) == .unknown)
     }
